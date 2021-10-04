@@ -66,7 +66,8 @@ Per https://clang.llvm.org/docs/JSONCompilationDatabase.html
             pwd = "/path/to/your/project/"
             path_stack.append(pwd)
 
-        # Special handling for projects like Redis, which has output like "printf xxx; cc xxx"
+        # Special handling for projects like Redis,
+        # which has output like "printf xxx; cc xxx"
         command = line
         ri = command.rfind(';')
         if -1 != ri:
@@ -83,18 +84,33 @@ Per https://clang.llvm.org/docs/JSONCompilationDatabase.html
 
     return result
 
+
 def usage():
-    print('usage')
+    print('''Usage: {} [compilation-db-file]
+
+[compilation-db-file] is optional, which is `compile_commands.json` by default.
+Specify it if you want to write to another file, and specify `-` for stdout.
+
+This CLI program takes GNU make output from stdin from a pipe,
+parse it, and write the json string to a file.
+'''.format(sys.argv[0]))
     sys.exit(1)
 
+
 def main():
-    make_output = sys.stdin.read()
+    make_output = sys.stdin.read().strip()
     if not make_output:
         usage()
 
-    sys.stdout.write(json.dumps(parse(make_output),
-                                indent=2))
-    sys.stdout.write('\n')
+    db = json.dumps(parse(make_output),
+                    indent=2) + '\n'
+    file_name = 'compile_commands.json' if len(sys.argv) == 1 else sys.argv[1]
+    if '-' != file_name:
+        with open(file_name, "w") as f:
+            f.write(db)
+    else:
+        sys.stdout.write(db)
+
 
 if __name__ == '__main__':
     main()
