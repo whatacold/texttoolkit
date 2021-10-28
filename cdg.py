@@ -12,11 +12,11 @@ It works by parsing the output of the GNU make command.'''
 
 file_name_regex = re.compile(r"[\w./+\-]+\.(s|cc?|cpp|cxx)\b",
                              re.IGNORECASE)
-enter_dir_regex = re.compile(r"^\s*make(?:\[\d+\])?: Entering directory [`\'\"](?P<dir>.*)[`\'\"]\s*$",
+enter_dir_regex = re.compile(r"^\s*(?:make|ninja)(?:\[\d+\])?: Entering directory [`\'\"](?P<dir>.*)[`\'\"]\s*$",
                              re.MULTILINE)
-leave_dir_regex = re.compile(r"^\s*make(?:\[\d+\])?: Leaving directory .*$",
+leave_dir_regex = re.compile(r"^\s*(?:make|ninja)(?:\[\d+\])?: Leaving directory .*$",
                              re.MULTILINE)
-compilers_regex = re.compile(r'\b(g?cc|[gc]\+\+|clang\+?\+?|icecc|s?ccache)\s')
+compilers_regex = re.compile(r'\b(g?cc|[gc]\+\+|clang\+?\+?|icecc|s?ccache)(?:.exe)?\s')
 
 
 def parse(make_output):
