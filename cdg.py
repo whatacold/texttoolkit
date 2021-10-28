@@ -16,7 +16,7 @@ enter_dir_regex = re.compile(r"^\s*(?:make|ninja)(?:\[\d+\])?: Entering director
                              re.MULTILINE)
 leave_dir_regex = re.compile(r"^\s*(?:make|ninja)(?:\[\d+\])?: Leaving directory .*$",
                              re.MULTILINE)
-compilers_regex = re.compile(r'\b(g?cc|[gc]\+\+|clang\+?\+?|icecc|s?ccache)(?:.exe)?\s')
+compilers_regex = re.compile(r'\b(g?cc|[gc]\+\+|clang\+?\+?|icecc|s?ccache)(?:.exe)?"?\s')
 
 
 def parse(make_output):
@@ -49,11 +49,17 @@ Per https://clang.llvm.org/docs/JSONCompilationDatabase.html
 
         # look backward and discard anything before delimiters
         i = match.start()
-        while i > 0:
-            j = i - 1
-            if line[j] in (' ', '\t', '\n', ';', '&'):
-                break
-            i -= 1
+        if line[match.start():match.end()].rstrip()[-1] == '"':
+            while i > 0:
+                i -= 1
+                if line[i] == '"' and (i == 0 or line[i-1] != '\\'):
+                    break
+        else:
+            while i > 0:
+                j = i - 1
+                if line[j] in (' ', '\t', '\n', ';', '&'):
+                    break
+                i -= 1
         line = line[i:]
 
         file_match = file_name_regex.search(line)
